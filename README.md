@@ -1,13 +1,6 @@
 # Prédiction du risque de défaut de paiement : projet MLOps
 
 [![CI](https://github.com/Naomi-na2024/prediction-defaut-credit-mlops/actions/workflows/ci.yml/badge.svg)](https://github.com/Naomi-na2024/prediction-defaut-credit-mlops/actions/workflows/ci.yml)
-![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
-![scikit-learn](https://img.shields.io/badge/scikit--learn-1.5-F7931E?logo=scikitlearn&logoColor=white)
-![Flask](https://img.shields.io/badge/Flask-3.0-000000?logo=flask&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
-![MLflow](https://img.shields.io/badge/MLflow-0194E2?logo=mlflow&logoColor=white)
-![AWS](https://img.shields.io/badge/AWS%20ECS-232F3E?logo=amazonwebservices&logoColor=white)
-![Licence MIT](https://img.shields.io/badge/licence-MIT-green)
 
 Une banque veut savoir, **avant d'accorder ou de renouveler un prêt**, si un client risque de ne pas le rembourser.
 Ce projet couvre tout le cycle de vie d'un modèle de Machine Learning : de l'analyse des données jusqu'à une
@@ -78,7 +71,7 @@ suivi de l'ancienneté professionnelle (voir l'analyse détaillée dans le noteb
 ├── templates/, static/     # Interface web
 ├── tests/                  # Tests automatisés
 ├── Dockerfile
-└── .github/workflows/      # CI (tests + Docker) et déploiement AWS
+└── .github/workflows/      # Intégration continue (tests + Docker)
 ```
 
 ## Lancer le projet
@@ -130,7 +123,7 @@ Réponse : `{"default": 1, "probability": 1.0}`
 
 ## Auteure
 
-**Naomi Nandjui** · Data Science & MLOps
-[LinkedIn](https://www.linkedin.com/in/VOTRE-PROFIL) · [E-mail](mailto:VOTRE-EMAIL)
+**Naomi Nandjui**
+[LinkedIn](https://www.linkedin.com/in/blesson-naomi-nandjui-na) · nandjuinaomi@gmail.com
 
 Projet réalisé en septembre 2024. Distribué sous licence MIT.
