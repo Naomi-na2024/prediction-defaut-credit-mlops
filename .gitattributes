@@ -1,0 +1,2 @@
+# Le notebook est de la documentation : il ne compte pas dans les langages du projet
+*.ipynb linguist-documentation
