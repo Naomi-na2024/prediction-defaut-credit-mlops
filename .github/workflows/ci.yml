@@ -1,0 +1,53 @@
+name: CI
+
+# Lancé à chaque push et à chaque pull request sur main :
+# vérifie le style du code, la qualité, les tests, puis que l'image Docker se construit.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  tests:
+    name: Qualité du code et tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Installer les dépendances
+        run: pip install -r requirements.txt pytest==8.3.3 black==24.10.0 pylint==3.3.1
+
+      - name: Vérifier le formatage (black)
+        run: black --check app.py train.py tests/
+
+      - name: Analyse statique (pylint)
+        run: pylint --disable=R,C app.py train.py
+
+      - name: Tests (pytest)
+        run: pytest -v
+
+  docker:
+    name: Construction de l'image Docker
+    runs-on: ubuntu-latest
+    needs: tests
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Construire l'image
+        run: docker build -t prediction-defaut-credit .
+
+      - name: Lancer le conteneur et vérifier qu'il répond
+        run: |
+          docker run -d -p 5000:5000 --name app prediction-defaut-credit
+          for i in $(seq 1 15); do
+            curl -sf http://localhost:5000/health && exit 0
+            sleep 2
+          done
+          docker logs app
+          exit 1
