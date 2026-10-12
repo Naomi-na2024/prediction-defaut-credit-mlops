@@ -1,0 +1,10 @@
+# Outils de développement : tests, qualité du code, notebook
+-r requirements.txt
+pytest==8.3.3
+black==24.10.0
+pylint==3.3.1
+mlflow==2.16.2
+imbalanced-learn==0.12.4
+matplotlib==3.9.2
+seaborn==0.13.2
+jupyter==1.1.1

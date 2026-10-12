@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scoring crédit</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="topbar">
+        <div class="wrap topbar-inner">
+            <span class="product">Scoring crédit</span>
+            <span class="model">Modèle : arbre de décision</span>
+        </div>
+    </header>
+
+    <main class="wrap">
+        <h1>Évaluer un dossier de prêt</h1>
+        <p class="intro">Renseignez la situation financière du client pour estimer son risque de défaut de paiement.</p>
+
+        <div class="workspace">
+            <form class="form" method="post" action="{{ url_for('home') }}" novalidate>
+                {% for name, label, cast, minimum, unit in fields %}
+                <div class="row">
+                    <label for="{{ name }}">{{ label }}</label>
+                    <div class="input">
+                        <input id="{{ name }}" type="number" name="{{ name }}" min="{{ minimum }}"
+                               step="{{ '1' if cast.__name__ == 'int' else 'any' }}"
+                               value="{{ values.get(name, '') }}" required>
+                        {% if unit %}<span class="unit">{{ unit }}</span>{% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+                <div class="actions">
+                    <button type="submit">Évaluer le dossier</button>
+                    <a class="reset" href="{{ url_for('home') }}">Effacer</a>
+                </div>
+            </form>
+
+            <section class="decision" aria-live="polite">
+                <h2>Décision du modèle</h2>
+                {% if error %}
+                    <p class="error">{{ error }}</p>
+                {% elif result %}
+                    {% set pct = '%.0f' | format(result.probability * 100) %}
+                    <div class="outcome {{ 'bad' if result.default else 'good' }}">
+                        <p class="verdict">{{ 'Défaut de paiement probable' if result.default else 'Faible risque de défaut' }}</p>
+                        <dl>
+                            <dt>Probabilité estimée</dt><dd>{{ pct }} %</dd>
+                            <dt>Seuil de décision</dt><dd>50 %</dd>
+                        </dl>
+                    </div>
+                    <p class="note">
+                        {% if result.default %}
+                            Ce profil est proche de celui des clients qui n'ont pas remboursé. Le dossier mérite une analyse approfondie.
+                        {% else %}
+                            Ce profil est proche de celui des clients qui ont remboursé leur prêt.
+                        {% endif %}
+                    </p>
+                {% else %}
+                    <p class="empty">Aucun dossier évalué pour le moment.</p>
+                {% endif %}
+            </section>
+        </div>
+    </main>
+
+    <footer class="wrap">
+        <p class="footer">Modèle entraîné sur 10 000 dossiers clients. Réalisé par Naomi Nandjui.</p>
+    </footer>
+</body>
+</html>
