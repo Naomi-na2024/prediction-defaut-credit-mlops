@@ -1,0 +1,25 @@
+# Environnements virtuels Python
+venv/
+.venv/
+env/
+
+# Fichiers générés par Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Suivi MLflow local
+mlruns/
+mlartifacts/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Éditeurs et système
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Secrets
+.env
