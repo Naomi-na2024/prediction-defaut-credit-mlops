@@ -2,8 +2,7 @@
 
 L'application est en ligne : **https://prediction-defaut-credit-mlops.onrender.com**
 
-Rien à installer, elle s'ouvre dans le navigateur, sur ordinateur ou sur téléphone. Hébergement gratuit :
-le premier chargement peut prendre jusqu'à une minute si l'application était en veille.
+Rien à installer, elle s'ouvre dans le navigateur, sur ordinateur ou sur téléphone.
 
 ## Évaluer un client
 

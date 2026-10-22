@@ -6,8 +6,6 @@ Une application qui estime si un client risque de ne pas rembourser son prêt, e
 
 ### [Essayer l'application en ligne →](https://prediction-defaut-credit-mlops.onrender.com)
 
-*Hébergement gratuit : le premier chargement peut prendre jusqu'à une minute si l'application était en veille.*
-
 ![Aperçu de l'application](docs/apercu-application.png)
 
 ## En bref
