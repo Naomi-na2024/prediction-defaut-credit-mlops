@@ -153,7 +153,7 @@ def test_request_id_is_sanitized(client):
 
 def test_form_accepts_french_decimal_comma(client):
     page = client.post("/", data={**SAFE_CLIENT, "income": "78039,39"}).text
-    assert 'class="score">' in page
+    assert 'data-count="' in page  # un score est affiché
 
 
 def test_error_messages_are_readable(client):

@@ -15,5 +15,4 @@ mlruns
 mlartifacts
 .env
 *.md
-Makefile
 docker-compose.yml

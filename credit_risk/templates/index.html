@@ -55,7 +55,7 @@
             </form>
         </section>
 
-        <section class="card result" aria-live="polite">
+        <section class="card result" aria-live="polite" {% if result or errors %}data-scroll-to{% endif %}>
             <header class="result-head">
                 <h2>Résultat de l'analyse</h2>
                 {% if result %}<span class="version">modèle v{{ card.model_version }}</span>{% endif %}
@@ -90,6 +90,7 @@
                             <path class="gauge-track" d="M 20 120 A 100 100 0 0 1 220 120"/>
                             {% if result %}
                             <path class="gauge-value" d="M 20 120 A 100 100 0 0 1 220 120" pathLength="100"
+                                  style="--share: {{ '%.2f' | format(dash.gauge.share) }}"
                                   stroke-dasharray="{{ '%.2f' | format(dash.gauge.share) }} 200"/>
                             <circle class="gauge-dot" cx="{{ '%.1f' | format(dash.gauge.x) }}" cy="{{ '%.1f' | format(dash.gauge.y) }}" r="9"/>
                             {% endif %}
@@ -97,7 +98,7 @@
                             <text x="220" y="138" class="gauge-scale" text-anchor="end">850</text>
                         </svg>
                         <figcaption>
-                            <span class="score">{{ result.credit_score if result else '—' }}</span>
+                            <span class="score" {% if result %}data-count="{{ result.credit_score }}" data-from="300"{% endif %}>{{ result.credit_score if result else '—' }}</span>
                             <span class="score-label">Score de crédit</span>
                         </figcaption>
                     </figure>
