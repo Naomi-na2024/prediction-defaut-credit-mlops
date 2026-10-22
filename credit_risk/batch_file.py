@@ -63,7 +63,7 @@ def read_table(filename: str, content: bytes) -> pd.DataFrame:
             "ou d'un fichier Excel (.xlsx)."
         ) from exc
 
-    frame = frame.reset_index(drop=True)  # numérotation 0, 1, 2… = lignes du fichier
+    frame = frame.reset_index(drop=True)  # numérotation 0, 1, 2... = lignes du fichier
     frame.columns = [str(c).strip().lower() for c in frame.columns]
     # pandas renomme une colonne en double « income » en « income.1 »
     names = [re.sub(r"\.\d+$", "", c) for c in frame.columns]

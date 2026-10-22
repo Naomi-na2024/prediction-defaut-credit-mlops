@@ -4,7 +4,7 @@
 
 Une application qui estime si un client risque de ne pas rembourser son prêt, et lui donne un score de crédit.
 
-### [Essayer l'application en ligne →](https://prediction-defaut-credit-mlops.onrender.com)
+### [Essayer l'application en ligne](https://prediction-defaut-credit-mlops.onrender.com)
 
 ![Aperçu de l'application](docs/apercu-application.png)
 
@@ -24,6 +24,6 @@ Une application qui estime si un client risque de ne pas rembourser son prêt, e
 
 ## Auteure
 
-Naomi Nandjui · [LinkedIn](https://www.linkedin.com/in/blesson-naomi-nandjui-na)
+Naomi Nandjui - [LinkedIn](https://www.linkedin.com/in/blesson-naomi-nandjui-na)
 
 © 2024-2026 Naomi Nandjui. Tous droits réservés (voir [LICENSE](LICENSE)).

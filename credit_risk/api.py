@@ -88,7 +88,7 @@ variable.
 Pour essayer : ouvrez une fonction ci-dessous, puis cliquez sur **Execute**.
 Un exemple de client est déjà rempli.
 
-[← Retour à CreditScore](/) · [Présentation de l'API](/developpeurs)
+[Retour à CreditScore](/) - [Présentation de l'API](/developpeurs)
 """
 REQUEST_ID = re.compile(r"[A-Za-z0-9_-]{1,64}")
 CSP = (

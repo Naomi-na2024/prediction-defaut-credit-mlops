@@ -13,7 +13,7 @@
             <dl class="hero-stats">
                 <div><dt>Dossiers analysés</dt><dd>{{ "{:,}".format(card.dataset.rows).replace(",", " ") }}</dd></div>
                 <div><dt>AUC du modèle</dt><dd>{{ '%.2f' | format(card.test_metrics.roc_auc) | replace('.', ',') }}</dd></div>
-                <div><dt>Notation</dt><dd>A → D</dd></div>
+                <div><dt>Notation</dt><dd>A à D</dd></div>
             </dl>
         </div>
     </section>
@@ -98,7 +98,7 @@
                             <text x="220" y="138" class="gauge-scale" text-anchor="end">850</text>
                         </svg>
                         <figcaption>
-                            <span class="score" {% if result %}data-count="{{ result.credit_score }}" data-from="300"{% endif %}>{{ result.credit_score if result else '—' }}</span>
+                            <span class="score" {% if result %}data-count="{{ result.credit_score }}" data-from="300"{% endif %}>{{ result.credit_score if result else '-' }}</span>
                             <span class="score-label">Score de crédit</span>
                         </figcaption>
                     </figure>
@@ -126,10 +126,10 @@
                 {% endif %}
 
                 <ol class="grades" aria-label="Échelle de notation">
-                    <li class="grade-D {{ 'on' if result and result.grade == 'D' }}"><b>D</b> 300 – 539</li>
-                    <li class="grade-C {{ 'on' if result and result.grade == 'C' }}"><b>C</b> 540 – 619</li>
-                    <li class="grade-B {{ 'on' if result and result.grade == 'B' }}"><b>B</b> 620 – 699</li>
-                    <li class="grade-A {{ 'on' if result and result.grade == 'A' }}"><b>A</b> 700 – 850</li>
+                    <li class="grade-D {{ 'on' if result and result.grade == 'D' }}"><b>D</b> 300 à 539</li>
+                    <li class="grade-C {{ 'on' if result and result.grade == 'C' }}"><b>C</b> 540 à 619</li>
+                    <li class="grade-B {{ 'on' if result and result.grade == 'B' }}"><b>B</b> 620 à 699</li>
+                    <li class="grade-A {{ 'on' if result and result.grade == 'A' }}"><b>A</b> 700 à 850</li>
                 </ol>
 
                 {% if result %}

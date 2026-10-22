@@ -23,7 +23,7 @@ un encadré orange prévient que le résultat est à interpréter avec prudence.
 Page « Évaluer un fichier » : https://prediction-defaut-credit-mlops.onrender.com/fichier
 
 1. Télécharger le modèle de fichier (`modele_clients.csv`) pour voir les colonnes attendues.
-2. Mettre une ligne par client. Les autres colonnes (nom, numéro de client…) sont conservées.
+2. Mettre une ligne par client. Les autres colonnes (nom, numéro de client, etc.) sont conservées.
 3. Importer le fichier (.csv ou .xlsx, jusqu'à 100 000 clients).
 
 La page affiche un résumé (score moyen, défauts prédits, répartition par note, lignes en erreur)
