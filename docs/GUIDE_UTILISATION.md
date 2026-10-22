@@ -1,29 +1,15 @@
 # Guide d'utilisation
 
-## Lancer l'application
+L'application est en ligne : **https://prediction-defaut-credit-mlops.onrender.com**
 
-Avec Docker (Docker Desktop doit être ouvert) :
+Rien à installer, elle s'ouvre dans le navigateur, sur ordinateur ou sur téléphone. Hébergement gratuit :
+le premier chargement peut prendre jusqu'à une minute si l'application était en veille.
 
-```bash
-docker compose up --build -d
-```
+## Évaluer un client
 
-Pour l'arrêter : `docker compose down`.
+Page d'accueil : https://prediction-defaut-credit-mlops.onrender.com
 
-Sans Docker :
-
-```bash
-python -m venv .venv
-.venv\Scripts\activate        # sous Mac/Linux : source .venv/bin/activate
-pip install -r requirements-dev.txt
-uvicorn credit_risk.api:app --port 5000
-```
-
-L'application est sur http://localhost:5000.
-
-## Utiliser la page web
-
-On remplit les 6 champs (ou on clique sur un des exemples), puis « Évaluer le dossier ».
+On remplit les 6 champs (ou on clique sur un des exemples), puis « Évaluer ».
 La page affiche le score de crédit (300 à 850), la note, la probabilité de défaut, deux ratios
 (dette / revenu et prêt / revenu) et l'impact de chaque variable sur le score.
 
@@ -35,7 +21,7 @@ un encadré orange prévient que le résultat est à interpréter avec prudence.
 
 ## Évaluer un fichier de clients
 
-Page « Évaluer un fichier » (http://localhost:5000/fichier) :
+Page « Évaluer un fichier » : https://prediction-defaut-credit-mlops.onrender.com/fichier
 
 1. Télécharger le modèle de fichier (`modele_clients.csv`) pour voir les colonnes attendues.
 2. Mettre une ligne par client. Les autres colonnes (nom, numéro de client…) sont conservées.
@@ -47,19 +33,24 @@ Le fichier de résultats s'ouvre directement dans Excel et reste disponible une 
 
 ## Utiliser l'API
 
-La page http://localhost:5000/developpeurs explique simplement l'API, avec un exemple de question et
-de réponse. Pour l'essayer, le plus simple est http://localhost:5000/docs : on choisit
-« Évaluer un client », puis « Execute ».
+- Présentation simple : https://prediction-defaut-credit-mlops.onrender.com/developpeurs
+- Pour l'essayer : https://prediction-defaut-credit-mlops.onrender.com/docs, choisir « Évaluer un client »,
+  puis « Execute ».
 
 Routes disponibles :
 - `POST /api/v1/fichier` : on envoie un fichier CSV ou Excel, on reçoit le fichier de résultats
-  (`curl -F "fichier=@clients.csv" http://localhost:5000/api/v1/fichier -o resultats.csv`)
 - `POST /api/v1/predict` : prédiction pour un client
 - `POST /api/v1/predict/batch` : prédiction pour plusieurs clients
 - `GET /api/v1/model` : infos sur le modèle (version, métriques, seuil)
 - `GET /health` : vérifie que l'application tourne
 
-Exemple en Python :
+Envoyer un fichier en une ligne de commande :
+
+```bash
+curl -F "fichier=@clients.csv" https://prediction-defaut-credit-mlops.onrender.com/api/v1/fichier -o resultats.csv
+```
+
+Évaluer un client en Python :
 
 ```python
 import requests
@@ -67,26 +58,32 @@ import requests
 client = {"credit_lines_outstanding": 5, "loan_amt_outstanding": 1958.93,
           "total_debt_outstanding": 8228.75, "income": 26648.44,
           "years_employed": 2, "fico_score": 572}
-print(requests.post("http://localhost:5000/api/v1/predict", json=client).json())
+url = "https://prediction-defaut-credit-mlops.onrender.com/api/v1/predict"
+print(requests.post(url, json=client).json())
 ```
 
-## Réentraîner le modèle
+## Pour les développeurs : faire tourner le projet soi-même
+
+Avec Docker (Docker Desktop doit être ouvert) :
 
 ```bash
+git clone https://github.com/Naomi-na2024/prediction-defaut-credit-mlops.git
+cd prediction-defaut-credit-mlops
+docker compose up --build -d
+```
+
+L'application s'ouvre alors sur le port 5000 de son ordinateur. Pour l'arrêter : `docker compose down`.
+
+Réentraîner le modèle (compare les modèles, garde le meilleur et met à jour `models/`) :
+
+```bash
+pip install -r requirements-dev.txt
 python -m credit_risk.train
 ```
 
-Le script compare les modèles, garde le meilleur et met à jour le dossier `models/`.
-Avec `--mlflow`, les résultats sont aussi enregistrés dans MLflow (`mlflow ui` pour les voir).
-
-## Tests
+Lancer les tests :
 
 ```bash
 pytest
 ruff check .
 ```
-
-## Problèmes fréquents
-
-- Erreur `dockerDesktopLinuxEngine` : Docker Desktop n'est pas lancé.
-- Port 5000 déjà utilisé : changer `"5000:5000"` en `"8080:5000"` dans `docker-compose.yml`.

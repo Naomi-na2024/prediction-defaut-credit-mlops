@@ -10,16 +10,6 @@ Une application qui estime si un client risque de ne pas rembourser son prêt, e
 
 ![Aperçu de l'application](docs/apercu-application.png)
 
-## Lancer l'application sur son ordinateur
-
-```bash
-git clone https://github.com/Naomi-na2024/prediction-defaut-credit-mlops.git
-cd prediction-defaut-credit-mlops
-docker compose up
-```
-
-Puis ouvrir http://localhost:5000 et cliquer sur un exemple.
-
 ## En bref
 
 - 10 000 clients, 6 variables financières
@@ -31,7 +21,7 @@ Puis ouvrir http://localhost:5000 et cliquer sur un exemple.
 ## Pour aller plus loin
 
 - L'analyse et le choix du modèle : [notebooks/analyse_et_modelisation.ipynb](notebooks/analyse_et_modelisation.ipynb)
-- Le guide d'utilisation : [docs/GUIDE_UTILISATION.md](docs/GUIDE_UTILISATION.md)
+- Le guide d'utilisation (et comment faire tourner le projet soi-même) : [docs/GUIDE_UTILISATION.md](docs/GUIDE_UTILISATION.md)
 - La documentation de l'API : https://prediction-defaut-credit-mlops.onrender.com/docs
 
 ## Auteure
