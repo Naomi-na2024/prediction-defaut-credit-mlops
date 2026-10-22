@@ -1,129 +1,96 @@
-# Prédiction du risque de défaut de paiement : projet MLOps
+# Prédiction du défaut de paiement (projet MLOps)
 
 [![CI](https://github.com/Naomi-na2024/prediction-defaut-credit-mlops/actions/workflows/ci.yml/badge.svg)](https://github.com/Naomi-na2024/prediction-defaut-credit-mlops/actions/workflows/ci.yml)
 
-Une banque veut savoir, **avant d'accorder ou de renouveler un prêt**, si un client risque de ne pas le rembourser.
-Ce projet couvre tout le cycle de vie d'un modèle de Machine Learning : de l'analyse des données jusqu'à une
-**application web conteneurisée, testée automatiquement et déployable sur AWS**.
+Le but du projet est de prédire si un client risque de ne pas rembourser son prêt. J'ai voulu aller au-delà
+du notebook : le modèle est servi par une API, l'application tourne dans Docker et les tests sont lancés
+automatiquement avec GitHub Actions.
 
 ![Aperçu de l'application](docs/apercu-application.png)
 
-## En bref
+## Données
 
-| | |
-|---|---|
-| **Problème** | Classification binaire : le client sera-t-il en défaut de paiement ? |
-| **Données** | 10 000 clients, 6 variables financières, 18,5 % de défauts |
-| **Modèle retenu** | Arbre de décision (comparé à une régression logistique) |
-| **Résultats (jeu de test)** | Accuracy 99,5 % · Précision 98,6 % · Rappel 98,6 % · F1 98,6 % |
-| **Mise en production** | API Flask · Docker · CI/CD GitHub Actions · AWS ECR + ECS · suivi MLflow |
+10 000 clients avec 6 variables : nombre de lignes de crédit, montant du prêt restant, dette totale,
+revenu, ancienneté professionnelle et score FICO. 18,5 % des clients sont en défaut.
 
-## Ce que montre ce projet
+## Modèle
 
-- **Analyse exploratoire** : valeurs manquantes, distributions, corrélations, détection des valeurs aberrantes (méthode IQR).
-- **Modélisation** : comparaison régression logistique / arbre de décision, gestion du déséquilibre des classes (SMOTE),
-  évaluation par matrice de confusion, courbe ROC et importance des variables.
-- **Suivi des expériences** avec MLflow (paramètres, métriques, modèles versionnés).
-- **Industrialisation** : le prétraitement et le modèle sont regroupés dans un même `Pipeline` scikit-learn, pour que
-  l'application applique exactement les mêmes transformations qu'à l'entraînement.
-- **Application web** Flask avec formulaire, validation des saisies et API JSON.
-- **Qualité et automatisation** : tests `pytest`, formatage `black`, analyse `pylint`, construction et test de l'image
-  Docker à chaque push.
-- **Déploiement** sur AWS (Amazon ECR + ECS) via GitHub Actions.
+J'ai comparé 4 modèles en validation croisée : régression logistique, arbre de décision, forêt aléatoire
+et gradient boosting. La régression logistique donne les meilleurs résultats, et c'est aussi la plus facile
+à expliquer, donc c'est celle que j'ai gardée. J'ai aussi testé SMOTE, mais ça n'améliorait pas le modèle.
 
-## Architecture
+Résultats sur le jeu de test : AUC de 1,00 et F1 de 99,6 %. Ces scores sont très élevés parce que les
+données sont sans doute synthétiques : sur des vraies données, il faudrait s'attendre à moins.
 
-```mermaid
-flowchart LR
-    A[(Données<br/>loan_data.csv)] --> B[Notebook<br/>analyse et choix du modèle]
-    B --> C[train.py<br/>Pipeline scikit-learn]
-    C --> D[(models/model.pkl)]
-    C -. métriques .-> M[MLflow]
-    D --> E[Application Flask]
-    E --> F[Image Docker]
-    G[Push sur GitHub] --> H[CI : black, pylint,<br/>tests, build Docker]
-    H --> I[Déploiement AWS<br/>ECR + ECS]
-    F --> I
-```
+La probabilité de défaut est ensuite convertie en score de crédit de 300 à 850, comme dans une scorecard
+bancaire, avec une note de A à D. L'application montre aussi l'impact de chaque variable sur ce score.
 
-## Variables utilisées
+Toute l'analyse est dans `notebooks/analyse_et_modelisation.ipynb`.
 
-| Variable | Description |
-|---|---|
-| `credit_lines_outstanding` | Nombre de lignes de crédit en cours |
-| `loan_amt_outstanding` | Montant du prêt restant à rembourser |
-| `total_debt_outstanding` | Dette totale en cours |
-| `income` | Revenu annuel |
-| `years_employed` | Ancienneté professionnelle (années) |
-| `fico_score` | Score de crédit FICO (300 à 850) |
-
-Dans le modèle retenu, le **nombre de lignes de crédit en cours** explique à lui seul près de 90 % des décisions,
-suivi de l'ancienneté professionnelle (voir l'analyse détaillée dans le notebook).
-
-## Structure du projet
+## Organisation
 
 ```
-├── app.py                  # Application web Flask + API
-├── train.py                # Entraînement reproductible du modèle
-├── data/loan_data.csv      # Jeu de données
-├── models/                 # Modèle entraîné et ses métriques
-├── notebooks/              # Analyse exploratoire et comparaison des modèles
-├── templates/, static/     # Interface web
-├── tests/                  # Tests automatisés
-├── Dockerfile
-└── .github/workflows/      # Intégration continue (tests + Docker)
+credit_risk/   code de l'application (entraînement, modèle, API, page web)
+data/          données
+models/        modèle entraîné + ses métriques
+notebooks/     analyse et choix du modèle
+tests/         tests
+docs/          guide d'utilisation
+deploy/        mise en ligne sur Hugging Face
 ```
 
 ## Lancer le projet
 
-**En local**
+Avec Docker :
 
 ```bash
-git clone https://github.com/Naomi-na2024/prediction-defaut-credit-mlops.git
-cd prediction-defaut-credit-mlops
-python -m venv venv
-source venv/bin/activate          # Windows : venv\Scripts\activate
-pip install -r requirements.txt
-python app.py                     # puis ouvrir http://localhost:5000
+docker compose up --build
 ```
 
-**Avec Docker**
-
-```bash
-docker build -t prediction-defaut-credit .
-docker run -p 5000:5000 prediction-defaut-credit
-```
-
-**Réentraîner le modèle et lancer les tests**
+Sans Docker :
 
 ```bash
 pip install -r requirements-dev.txt
-python train.py --mlflow          # enregistre aussi le run dans MLflow (mlflow ui pour le consulter)
-pytest -v
+uvicorn credit_risk.api:app --port 5000
 ```
 
-## Utiliser l'API
+L'application est ensuite sur http://localhost:5000. On peut y évaluer un client, ou importer un fichier
+Excel / CSV pour noter tout un portefeuille (50 000 clients en moins de 3 secondes).
+La documentation de l'API est sur http://localhost:5000/docs.
+
+Pour réentraîner le modèle et lancer les tests :
 
 ```bash
-curl -X POST http://localhost:5000/api/predict \
-  -H "Content-Type: application/json" \
-  -d '{"credit_lines_outstanding": 5, "loan_amt_outstanding": 1958, "total_debt_outstanding": 8228,
-       "income": 26648, "years_employed": 2, "fico_score": 572}'
+python -m credit_risk.train
+pytest
 ```
 
-Réponse : `{"default": 1, "probability": 1.0}`
+Plus de détails dans le [guide d'utilisation](docs/GUIDE_UTILISATION.md).
 
-## Limites et pistes d'amélioration
+## Exemple d'appel à l'API
 
-- Les données sont très bien séparées (vraisemblablement synthétiques), ce qui explique des scores proches de 100 %.
-  Sur des données réelles, il faudrait s'attendre à des performances plus modestes.
-- Un arbre de décision non élagué donne des probabilités tranchées (0 % ou 100 %). Un modèle comme
-  la forêt aléatoire ou le gradient boosting, ou une calibration des probabilités, donnerait un score plus nuancé.
-- Pistes : explicabilité des prédictions (SHAP), surveillance de la dérive des données en production.
+```bash
+curl -X POST http://localhost:5000/api/v1/predict \
+  -H "Content-Type: application/json" \
+  -d '{"credit_lines_outstanding": 5, "loan_amt_outstanding": 1958.93, "total_debt_outstanding": 8228.75,
+       "income": 26648.44, "years_employed": 2, "fico_score": 572}'
+```
+
+La réponse donne la probabilité de défaut, le score de crédit, la note et l'impact de chaque variable.
+
+## Outils utilisés
+
+Python, scikit-learn, FastAPI, Docker, GitHub Actions, MLflow, AWS (ECR et ECS).
+
+## Pistes d'amélioration
+
+- Choisir le seuil en fonction du coût réel d'une erreur pour la banque
+- Suivre la dérive des données une fois le modèle en production
+- Tester le modèle sur des données réelles
 
 ## Auteure
 
-**Naomi Nandjui**
-[LinkedIn](https://www.linkedin.com/in/blesson-naomi-nandjui-na) · nandjuinaomi@gmail.com
+Naomi Nandjui - [LinkedIn](https://www.linkedin.com/in/blesson-naomi-nandjui-na)
 
-Projet réalisé en septembre 2024. Distribué sous licence MIT.
+© 2024-2026 Naomi Nandjui. Tous droits réservés : le code est consultable, mais pas réutilisable
+sans mon accord (voir [LICENSE](LICENSE)).

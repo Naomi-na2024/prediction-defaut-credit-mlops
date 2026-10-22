@@ -1,0 +1,104 @@
+{
+  "model_name": "logistic_regression",
+  "model_version": "2026.10.21-2140",
+  "trained_at": "2026-10-21T21:40:09+00:00",
+  "sklearn_version": "1.6.1",
+  "threshold": 0.448,
+  "dataset": {
+    "rows": 10000,
+    "train_rows": 8000,
+    "test_rows": 2000,
+    "default_rate": 0.1851
+  },
+  "features": [
+    "credit_lines_outstanding",
+    "loan_amt_outstanding",
+    "total_debt_outstanding",
+    "income",
+    "years_employed",
+    "fico_score"
+  ],
+  "reference_values": {
+    "credit_lines_outstanding": 1.0,
+    "loan_amt_outstanding": 4043.509496,
+    "total_debt_outstanding": 6707.165278,
+    "income": 70028.406945,
+    "years_employed": 5.0,
+    "fico_score": 638.0
+  },
+  "feature_ranges": {
+    "credit_lines_outstanding": [
+      0.0,
+      5.0
+    ],
+    "loan_amt_outstanding": [
+      46.7839734,
+      10750.67781
+    ],
+    "total_debt_outstanding": [
+      31.65273156,
+      42558.45149
+    ],
+    "income": [
+      1000.0,
+      148412.1805
+    ],
+    "years_employed": [
+      0.0,
+      10.0
+    ],
+    "fico_score": [
+      409.0,
+      850.0
+    ]
+  },
+  "cross_validation": {
+    "logistic_regression": {
+      "roc_auc": 1.0,
+      "average_precision": 0.9999,
+      "f1": 0.9929
+    },
+    "decision_tree": {
+      "roc_auc": 0.9992,
+      "average_precision": 0.9959,
+      "f1": 0.9765
+    },
+    "random_forest": {
+      "roc_auc": 0.9997,
+      "average_precision": 0.9988,
+      "f1": 0.979
+    },
+    "gradient_boosting": {
+      "roc_auc": 0.9998,
+      "average_precision": 0.9993,
+      "f1": 0.9881
+    }
+  },
+  "test_metrics": {
+    "accuracy": 0.9985,
+    "precision": 0.9946,
+    "recall": 0.9973,
+    "f1_score": 0.996,
+    "roc_auc": 1.0,
+    "average_precision": 0.9999,
+    "brier_score": 0.0028
+  },
+  "confusion_matrix": [
+    [
+      1628,
+      2
+    ],
+    [
+      1,
+      369
+    ]
+  ],
+  "feature_importance": {
+    "credit_lines_outstanding": 0.2021,
+    "total_debt_outstanding": 0.0087,
+    "years_employed": 0.0038,
+    "income": 0.0032,
+    "fico_score": 0.0007,
+    "loan_amt_outstanding": 0.0
+  }
+}

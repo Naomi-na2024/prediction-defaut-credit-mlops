@@ -1,0 +1,34 @@
+# Lancer l'application :            docker compose up --build
+# Lancer aussi le serveur MLflow :  docker compose --profile mlflow up --build
+services:
+  api:
+    build: .
+    image: prediction-defaut-credit:latest
+    container_name: prediction-defaut-credit
+    ports:
+      - "5000:5000"
+    environment:
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY:-2}
+      # Décommenter pour forcer un seuil de décision différent de celui du modèle
+      # DECISION_THRESHOLD: "0.5"
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  mlflow:
+    profiles: ["mlflow"]
+    image: ghcr.io/mlflow/mlflow:v2.22.0
+    container_name: mlflow
+    command: >
+      mlflow server --host 0.0.0.0 --port 5001
+      --backend-store-uri sqlite:////mlflow/mlflow.db
+      --artifacts-destination /mlflow/artifacts
+    ports:
+      - "5001:5001"
+    volumes:
+      - mlflow-data:/mlflow
+
+volumes:
+  mlflow-data:

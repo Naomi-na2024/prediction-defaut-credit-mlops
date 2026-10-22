@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block content %}
+    <section class="hero">
+        <svg class="hero-arc" viewBox="0 0 600 320" aria-hidden="true">
+            <path d="M 40 300 A 260 260 0 0 1 560 300" fill="none" stroke="rgba(157,184,255,.18)" stroke-width="34" stroke-linecap="round"/>
+            <path d="M 40 300 A 260 260 0 0 1 430 75" fill="none" stroke="rgba(157,184,255,.28)" stroke-width="34" stroke-linecap="round"/>
+        </svg>
+        <div class="wrap hero-inner">
+            <div>
+                <p class="kicker">Analyse du risque de crédit</p>
+                <h1>Évaluez un dossier de prêt <br class="desktop">en quelques secondes</h1>
+            </div>
+            <dl class="hero-stats">
+                <div><dt>Dossiers analysés</dt><dd>{{ "{:,}".format(card.dataset.rows).replace(",", " ") }}</dd></div>
+                <div><dt>AUC du modèle</dt><dd>{{ '%.2f' | format(card.test_metrics.roc_auc) | replace('.', ',') }}</dd></div>
+                <div><dt>Notation</dt><dd>A → D</dd></div>
+            </dl>
+        </div>
+    </section>
+
+    <main class="wrap main">
+        <section class="card form-card">
+            <h2>Situation du client</h2>
+
+            <div class="examples">
+                <span class="examples-label">Essayer un exemple</span>
+                <div class="chips">
+                    <a class="chip {{ 'on' if example == 'sur' }}" href="/?exemple=sur"><b class="chip-grade grade-A">A</b>Profil sûr</a>
+                    <a class="chip {{ 'on' if example == 'intermediaire' }}" href="/?exemple=intermediaire"><b class="chip-grade grade-C">C</b>Intermédiaire</a>
+                    <a class="chip {{ 'on' if example == 'risque' }}" href="/?exemple=risque"><b class="chip-grade grade-D">D</b>Profil à risque</a>
+                </div>
+            </div>
+
+            <form method="post" action="/" novalidate>
+                <div class="fields">
+                    {% for f in fields %}
+                    <label class="field" for="{{ f.name }}">
+                        <span class="field-label">{{ f.label }}</span>
+                        <span class="input">
+                            <input id="{{ f.name }}" type="number" name="{{ f.name }}"
+                                   min="{{ f.min }}" max="{{ f.max }}" step="{{ f.step }}" inputmode="decimal"
+                                   value="{{ values.get(f.name, '') }}" required>
+                            {% if f.unit %}<span class="unit">{{ f.unit }}</span>{% endif %}
+                        </span>
+                    </label>
+                    {% endfor %}
+                </div>
+                <div class="actions">
+                    <button type="submit">
+                        Évaluer
+                        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <a class="reset" href="/">Effacer</a>
+                </div>
+            </form>
+        </section>
+
+        <section class="card result" aria-live="polite">
+            <header class="result-head">
+                <h2>Résultat de l'analyse</h2>
+                {% if result %}<span class="version">modèle v{{ card.model_version }}</span>{% endif %}
+            </header>
+
+            {% if errors %}
+                <ul class="errors">
+                    {% for e in errors %}<li>{{ e }}</li>{% endfor %}
+                </ul>
+            {% else %}
+                {% set tone = {"faible": "low", "modéré": "mid", "élevé": "high"}[result.risk_level] if result else "none" %}
+                {% set status = {"A": "good", "B": "good", "C": "warn", "D": "bad"}[result.grade] if result else "none" %}
+                <div class="score-row">
+                    <figure class="gauge {{ status }}">
+                        <svg viewBox="0 0 240 140" role="img"
+                             aria-label="{% if result %}Score de crédit : {{ result.credit_score }} sur 850{% else %}Score de crédit{% endif %}">
+                            <defs>
+                                <linearGradient id="gauge-good" x1="0" y1="0" x2="1" y2="0">
+                                    <stop offset="0%" stop-color="#9db8ff"/>
+                                    <stop offset="55%" stop-color="#0033cc"/>
+                                    <stop offset="100%" stop-color="#00008f"/>
+                                </linearGradient>
+                                <linearGradient id="gauge-warn" x1="0" y1="0" x2="1" y2="0">
+                                    <stop offset="0%" stop-color="#ffd18a"/>
+                                    <stop offset="100%" stop-color="#e07b00"/>
+                                </linearGradient>
+                                <linearGradient id="gauge-bad" x1="0" y1="0" x2="1" y2="0">
+                                    <stop offset="0%" stop-color="#ff9a9a"/>
+                                    <stop offset="100%" stop-color="#d0112b"/>
+                                </linearGradient>
+                            </defs>
+                            <path class="gauge-track" d="M 20 120 A 100 100 0 0 1 220 120"/>
+                            {% if result %}
+                            <path class="gauge-value" d="M 20 120 A 100 100 0 0 1 220 120" pathLength="100"
+                                  stroke-dasharray="{{ '%.2f' | format(dash.gauge.share) }} 200"/>
+                            <circle class="gauge-dot" cx="{{ '%.1f' | format(dash.gauge.x) }}" cy="{{ '%.1f' | format(dash.gauge.y) }}" r="9"/>
+                            {% endif %}
+                            <text x="20" y="138" class="gauge-scale">300</text>
+                            <text x="220" y="138" class="gauge-scale" text-anchor="end">850</text>
+                        </svg>
+                        <figcaption>
+                            <span class="score">{{ result.credit_score if result else '—' }}</span>
+                            <span class="score-label">Score de crédit</span>
+                        </figcaption>
+                    </figure>
+
+                    <div class="decision {{ status }}">
+                        {% if result %}
+                            <span class="grade grade-{{ result.grade }}">{{ result.grade }}</span>
+                            <p class="verdict">
+                                {% if result.default %}Défaut de paiement probable
+                                {% else %}{{ {"A": "Excellent dossier", "B": "Bon dossier", "C": "Dossier à surveiller", "D": "Dossier fragile"}[result.grade] }}{% endif %}
+                            </p>
+                            <p class="pill {{ tone }}">Risque {{ result.risk_level }}</p>
+                        {% else %}
+                            <p class="empty">Choisissez un exemple ou renseignez la situation du client, puis lancez l'évaluation.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if result and result.warnings %}
+                <div class="warning" role="note">
+                    <strong>Résultat à interpréter avec prudence</strong>
+                    <span>Certaines valeurs sont en dehors de ce que le modèle a appris :</span>
+                    <ul>{% for w in result.warnings %}<li>{{ w }}</li>{% endfor %}</ul>
+                </div>
+                {% endif %}
+
+                <ol class="grades" aria-label="Échelle de notation">
+                    <li class="grade-D {{ 'on' if result and result.grade == 'D' }}"><b>D</b> 300 – 539</li>
+                    <li class="grade-C {{ 'on' if result and result.grade == 'C' }}"><b>C</b> 540 – 619</li>
+                    <li class="grade-B {{ 'on' if result and result.grade == 'B' }}"><b>B</b> 620 – 699</li>
+                    <li class="grade-A {{ 'on' if result and result.grade == 'A' }}"><b>A</b> 700 – 850</li>
+                </ol>
+
+                {% if result %}
+                <div class="kpis">
+                    <div class="kpi">
+                        <span class="kpi-label">Probabilité de défaut</span>
+                        <span class="kpi-value">{{ ('%.1f' | format(result.probability * 100)) | replace('.', ',') }} %</span>
+                        <span class="kpi-note">seuil {{ '%.0f' | format(threshold * 100) }} %</span>
+                    </div>
+                    <div class="kpi">
+                        <span class="kpi-label">Dette / revenu</span>
+                        <span class="kpi-value">{{ '%.0f' | format(dash.debt_ratio) }} %</span>
+                        <span class="kpi-bar"><span style="width: {{ [dash.debt_ratio, 100] | min }}%"></span></span>
+                    </div>
+                    <div class="kpi">
+                        <span class="kpi-label">Prêt / revenu</span>
+                        <span class="kpi-value">{{ '%.0f' | format(dash.loan_ratio) }} %</span>
+                        <span class="kpi-bar"><span style="width: {{ [dash.loan_ratio, 100] | min }}%"></span></span>
+                    </div>
+                </div>
+
+                <h3>Impact de chaque variable sur le score</h3>
+                <ul class="factors">
+                    {% for c in dash.factors %}
+                    <li>
+                        <span class="factor-name">{{ c.label }}</span>
+                        <span class="factor-chart">
+                            <span class="half neg">{% if c.points < 0 %}<span style="width: {{ '%.0f' | format(c.width) }}%"></span>{% endif %}</span>
+                            <span class="half pos">{% if c.points > 0 %}<span style="width: {{ '%.0f' | format(c.width) }}%"></span>{% endif %}</span>
+                        </span>
+                        <span class="factor-value {{ 'neg' if c.points < 0 else 'pos' }}">{{ '%+d' | format(c.points) }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <p class="note">En points de score, par rapport à un client médian. À gauche : fait baisser le score, à droite : l'améliore.</p>
+                {% endif %}
+            {% endif %}
+        </section>
+    </main>
+
+{% endblock %}

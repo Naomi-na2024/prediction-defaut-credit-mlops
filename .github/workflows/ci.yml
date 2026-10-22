@@ -1,12 +1,20 @@
 name: CI
 
-# Lancé à chaque push et à chaque pull request sur main :
-# vérifie le style du code, la qualité, les tests, puis que l'image Docker se construit.
+# À chaque push et pull request sur main :
+# qualité du code -> tests -> image Docker testée -> publication sur GHCR (push sur main).
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository }}
 
 jobs:
   tests:
@@ -17,37 +25,75 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
           cache: pip
 
       - name: Installer les dépendances
-        run: pip install -r requirements.txt pytest==8.3.3 black==24.10.0 pylint==3.3.1
+        run: pip install -r requirements.txt pytest==8.3.5 pytest-cov==6.1.1 httpx==0.28.1 ruff==0.11.8
 
-      - name: Vérifier le formatage (black)
-        run: black --check app.py train.py tests/
+      - name: Analyse statique (ruff)
+        run: ruff check .
 
-      - name: Analyse statique (pylint)
-        run: pylint --disable=R,C app.py train.py
+      - name: Vérifier le formatage (ruff format)
+        run: ruff format --check .
 
-      - name: Tests (pytest)
-        run: pytest -v
+      - name: Tests et couverture (pytest)
+        run: pytest --cov --cov-report=term-missing --cov-fail-under=90
+
+      - name: Failles de sécurité connues dans les dépendances (pip-audit)
+        run: pip install pip-audit && pip-audit -r requirements.txt
 
   docker:
-    name: Construction de l'image Docker
+    name: Image Docker
     runs-on: ubuntu-latest
     needs: tests
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
 
+      - uses: docker/setup-buildx-action@v3
+
       - name: Construire l'image
-        run: docker build -t prediction-defaut-credit .
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: prediction-defaut-credit:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Lancer le conteneur et vérifier qu'il répond
         run: |
-          docker run -d -p 5000:5000 --name app prediction-defaut-credit
-          for i in $(seq 1 15); do
-            curl -sf http://localhost:5000/health && exit 0
+          docker run -d -p 5000:5000 --name app prediction-defaut-credit:test
+          for i in $(seq 1 20); do
+            if curl -sf http://localhost:5000/health; then break; fi
             sleep 2
           done
-          docker logs app
-          exit 1
+          curl -sf -X POST http://localhost:5000/api/v1/predict \
+            -H "Content-Type: application/json" \
+            -d '{"credit_lines_outstanding": 5, "loan_amt_outstanding": 1958.93, "total_debt_outstanding": 8228.75, "income": 26648.44, "years_employed": 2, "fico_score": 572}' \
+            | tee response.json
+          grep -q '"default":1' response.json
+
+      - name: Logs du conteneur en cas d'échec
+        if: failure()
+        run: docker logs app
+
+      - name: Connexion à GitHub Container Registry
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publier l'image (latest + sha)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          IMAGE=$(echo "$IMAGE_NAME" | tr '[:upper:]' '[:lower:]')
+          for tag in latest ${GITHUB_SHA::7}; do
+            docker tag prediction-defaut-credit:test "$IMAGE:$tag"
+            docker push "$IMAGE:$tag"
+          done

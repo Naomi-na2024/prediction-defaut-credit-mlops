@@ -2,6 +2,7 @@
 venv/
 .venv/
 env/
+my-env/
 
 # Fichiers générés par Python
 __pycache__/
@@ -23,3 +24,8 @@ Thumbs.db
 
 # Secrets
 .env
+
+# Outils
+.ruff_cache/
+.coverage
+htmlcov/

@@ -1,0 +1,24 @@
+[project]
+name = "prediction-defaut-credit"
+version = "2.0.0"
+description = "Prédiction du risque de défaut de paiement : modèle, API FastAPI et déploiement Docker / AWS"
+authors = [{ name = "Naomi Nandjui" }]
+license = { text = "Tous droits réservés" }
+requires-python = ">=3.11"
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+extend-exclude = ["notebooks"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "N"]
+ignore = ["B008"]  # Query(...) dans les signatures FastAPI
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.coverage.run]
+source = ["credit_risk"]
+omit = ["credit_risk/train.py"]

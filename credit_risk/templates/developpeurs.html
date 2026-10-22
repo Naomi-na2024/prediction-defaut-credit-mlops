@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}CreditScore · Développeurs{% endblock %}
+{% block content %}
+    <section class="hero hero-small">
+        <div class="wrap hero-inner">
+            <div>
+                <p class="kicker">Développeurs</p>
+                <h1>Intégrez le score de crédit <br class="desktop">dans vos outils</h1>
+                <p class="hero-sub">Une API simple : vous envoyez la situation d'un client, elle vous renvoie son score.</p>
+            </div>
+            <a class="button-light" href="/docs">Tester l'API en direct →</a>
+        </div>
+    </section>
+
+    <main class="wrap dev">
+        <section class="card">
+            <h2>À quoi sert l'API ?</h2>
+            <p class="lead">
+                La page « Évaluer un dossier » est faite pour un conseiller. L'API, elle, permet à <strong>un autre logiciel</strong>
+                d'obtenir le même résultat automatiquement : le logiciel de prêts d'une banque, une application mobile,
+                un tableur ou un traitement qui note des milliers de dossiers chaque nuit.
+            </p>
+            <ol class="steps">
+                <li><b>1</b><strong>Votre logiciel envoie</strong><span>les 6 informations du client</span></li>
+                <li><b>2</b><strong>Le modèle calcule</strong><span>en quelques millisecondes</span></li>
+                <li><b>3</b><strong>Vous recevez</strong><span>le score, la note, la probabilité de défaut et l'explication</span></li>
+            </ol>
+        </section>
+
+        <section class="card">
+            <h2>Le plus simple : envoyer un fichier</h2>
+            <p class="lead">
+                Envoyez un fichier CSV ou Excel avec une ligne par client (mêmes colonnes que le
+                <a href="/fichier/modele.csv">modèle de fichier</a>). Vous recevez le même fichier,
+                complété avec le score, la note et la probabilité de défaut de chaque client.
+            </p>
+            <div class="example-grid">
+                <div>
+                    <h3>En une ligne de commande</h3>
+<pre class="code">curl -F "fichier=@clients.csv" \
+  {{ base_url }}/api/v1/fichier \
+  -o resultats.csv</pre>
+                </div>
+                <div>
+                    <h3>En Python</h3>
+<pre class="code">import requests
+
+with open("clients.csv", "rb") as f:
+    r = requests.post("{{ base_url }}/api/v1/fichier",
+                      files={"fichier": f})
+open("resultats.csv", "wb").write(r.content)</pre>
+                </div>
+            </div>
+            <p class="note">Sans écrire de code : utilisez la page <a href="/fichier">Évaluer un fichier</a>,
+                ou « Tester l'API en direct » puis « Évaluer un fichier de clients ».</p>
+        </section>
+
+        <section class="card">
+            <h2>Toutes les fonctions</h2>
+            <div class="endpoints">
+                <div class="endpoint">
+                    <span class="method post">POST</span>
+                    <code>/api/v1/fichier</code>
+                    <p><strong>Évaluer un fichier de clients.</strong> On envoie un CSV ou un Excel, on reçoit le fichier de résultats.</p>
+                </div>
+                <div class="endpoint">
+                    <span class="method post">POST</span>
+                    <code>/api/v1/predict</code>
+                    <p><strong>Évaluer un client.</strong> Renvoie son score, sa note et ce qui a pesé dans la décision.</p>
+                </div>
+                <div class="endpoint">
+                    <span class="method post">POST</span>
+                    <code>/api/v1/predict/batch</code>
+                    <p><strong>Évaluer plusieurs clients d'un coup</strong>, jusqu'à 1 000 par envoi.</p>
+                </div>
+                <div class="endpoint">
+                    <span class="method get">GET</span>
+                    <code>/api/v1/model</code>
+                    <p><strong>Informations sur le modèle :</strong> version, performances, seuil de décision.</p>
+                </div>
+                <div class="endpoint">
+                    <span class="method get">GET</span>
+                    <code>/health</code>
+                    <p><strong>Vérifier que le service fonctionne.</strong> Utilisé par Docker et les serveurs.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Exemple</h2>
+            <div class="example-grid">
+                <div>
+                    <h3>Ce que vous envoyez</h3>
+<pre class="code"><span class="code-comment">POST {{ base_url }}/api/v1/predict</span>
+{{ request_example }}</pre>
+                </div>
+                <div>
+                    <h3>Ce que vous recevez</h3>
+<pre class="code">{{ response_example }}</pre>
+                </div>
+            </div>
+
+            <h3>Comment lire la réponse</h3>
+            <div class="table-wrap">
+                <table class="fields-table">
+                    <tbody>
+                        <tr><td><code>credit_score</code></td><td>Score de crédit, de 300 (très risqué) à 850 (très sûr)</td></tr>
+                        <tr><td><code>grade</code></td><td>Note : A ou B = risque faible, C = modéré, D = élevé</td></tr>
+                        <tr><td><code>probability</code></td><td>Probabilité que le client ne rembourse pas (0 = 0 %, 1 = 100 %)</td></tr>
+                        <tr><td><code>default</code></td><td>1 si un défaut de paiement est prédit, 0 sinon</td></tr>
+                        <tr><td><code>warnings</code></td><td>Valeurs inhabituelles pour le modèle : résultat à prendre avec prudence</td></tr>
+                        <tr><td><code>explanation</code></td><td>Pour chaque variable, les points gagnés ou perdus sur le score</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="card cta">
+            <div>
+                <h2>Prêt à essayer ?</h2>
+                <p>La documentation technique permet d'envoyer une vraie requête depuis le navigateur, sans rien installer.</p>
+            </div>
+            <a class="button" href="/docs">Tester l'API en direct →</a>
+        </section>
+    </main>
+{% endblock %}
