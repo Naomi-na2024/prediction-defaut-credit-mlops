@@ -1,6 +1,6 @@
 # Dépendances nécessaires pour faire tourner l'API (image Docker)
 fastapi==0.142.4
-starlette==1.7.0
+starlette==1.9.0
 uvicorn[standard]==0.54.0
 jinja2==3.1.6
 python-multipart==0.0.32
