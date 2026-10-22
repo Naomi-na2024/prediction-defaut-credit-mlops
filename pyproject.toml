@@ -17,6 +17,7 @@ ignore = ["B008"]  # Query(...) dans les signatures FastAPI
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
 addopts = "-q"
 
 [tool.coverage.run]
