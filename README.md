@@ -4,9 +4,13 @@
 
 Une application qui estime si un client risque de ne pas rembourser son prêt, et lui donne un score de crédit.
 
+### [Essayer l'application en ligne →](https://prediction-defaut-credit-mlops.onrender.com)
+
+*Hébergement gratuit : le premier chargement peut prendre jusqu'à une minute si l'application était en veille.*
+
 ![Aperçu de l'application](docs/apercu-application.png)
 
-## Tester l'application
+## Lancer l'application sur son ordinateur
 
 ```bash
 git clone https://github.com/Naomi-na2024/prediction-defaut-credit-mlops.git
@@ -28,7 +32,7 @@ Puis ouvrir http://localhost:5000 et cliquer sur un exemple.
 
 - L'analyse et le choix du modèle : [notebooks/analyse_et_modelisation.ipynb](notebooks/analyse_et_modelisation.ipynb)
 - Le guide d'utilisation : [docs/GUIDE_UTILISATION.md](docs/GUIDE_UTILISATION.md)
-- La documentation de l'API : http://localhost:5000/docs une fois l'application lancée
+- La documentation de l'API : https://prediction-defaut-credit-mlops.onrender.com/docs
 
 ## Auteure
 
